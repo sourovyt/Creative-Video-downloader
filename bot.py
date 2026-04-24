@@ -48,7 +48,7 @@ def keep_alive():
 def start(message):
     markup = InlineKeyboardMarkup()
 
-    btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url=https://t.me/CreativeSpark1)
+    btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
     btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
     btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url=@ShahriarRazz143)
 
