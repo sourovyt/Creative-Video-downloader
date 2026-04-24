@@ -7,7 +7,7 @@ import threading
 from flask import Flask
 
 # ============ CONFIG ============
-BOT_TOKEN = "8621986845:AAE-iTAWwH0aTQKX_6np6JIB_mfVU7HhfXM"
+BOT_TOKEN = "8574407105:AAHzlKA86eiJeKFtJKCuwE-1wIzlAycVoXY"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
