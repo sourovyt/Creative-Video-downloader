@@ -44,9 +44,7 @@ def keep_alive():
     t.start()
 
 # ============ START COMMAND ============
-@bot.message_handler(commands=['start'])
-def start(message):
-    markup = InlineKeyboardMarkup()
+bot.send_message(message.chat.id, text, reply_markup=markup)
 
     btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
     btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
