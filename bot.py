@@ -7,10 +7,10 @@ import threading
 from flask import Flask
 
 # ============ CONFIG ============
-BOT_TOKEN = "8574407105:AAHzlKA86eiJeKFtJKCuwE-1wIzlAycVoXY"
+BOT_TOKEN = "YOUR_NEW_BOT_TOKEN_HERE"
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# ============ FORCE JOIN CHANNEL ============
+# ============ FORCE JOIN ============
 CHANNEL_USERNAME = "@CreativeSpark1"
 
 def is_joined(user_id):
@@ -44,11 +44,13 @@ def keep_alive():
     t.start()
 
 # ============ START COMMAND ============
-bot.send_message(message.chat.id, text, reply_markup=markup)
+@bot.message_handler(commands=['start'])
+def start(message):
+    markup = InlineKeyboardMarkup()
 
     btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
     btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
-    btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/@ShahriarRazz143")
+    btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/ShahriarRazz143")
 
     markup.add(btn1)
     markup.add(btn2, btn3)
@@ -61,7 +63,7 @@ bot.send_message(message.chat.id, text, reply_markup=markup)
 
 💎 Powered by: @CreativeDownloader_Bot"""
 
-    bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=markup)
+    bot.send_message(message.chat.id, text, reply_markup=markup)
 
 # ============ VIDEO HANDLER ============
 @bot.message_handler(func=lambda message: True)
@@ -95,19 +97,11 @@ def download_video(message):
             info = ydl.extract_info(url, download=False)
             filename = ydl.prepare_filename(info)
 
-            bot.edit_message_text(
-                "⬇️ Downloading... (50%)",
-                message.chat.id,
-                status_msg.message_id
-            )
+            bot.edit_message_text("⬇️ Downloading... (50%)", message.chat.id, status_msg.message_id)
 
             ydl.download([url])
 
-        bot.edit_message_text(
-            "📤 Uploading... (100%)",
-            message.chat.id,
-            status_msg.message_id
-        )
+        bot.edit_message_text("📤 Uploading... (100%)", message.chat.id, status_msg.message_id)
 
         with open(filename, 'rb') as video:
             bot.send_video(
