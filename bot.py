@@ -8,8 +8,17 @@ from flask import Flask
 
 # ============ CONFIG ============
 BOT_TOKEN = "8574407105:AAHzlKA86eiJeKFtJKCuwE-1wIzlAycVoXY"
-
 bot = telebot.TeleBot(BOT_TOKEN)
+
+# ============ FORCE JOIN CHANNEL ============
+CHANNEL_USERNAME = "@CreativeSpark1"
+
+def is_joined(user_id):
+    try:
+        member = bot.get_chat_member(CHANNEL_USERNAME, user_id)
+        return member.status in ["member", "administrator", "creator"]
+    except:
+        return False
 
 # ============ SECURED LINKS ============
 YOUTUBE_LINK = base64.b64decode(
@@ -39,20 +48,20 @@ def keep_alive():
 def start(message):
     markup = InlineKeyboardMarkup()
 
-    btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url=YOUTUBE_LINK)
+    btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url=https://t.me/CreativeSpark1)
     btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
-    btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url=SUPPORT_LINK)
+    btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url=@ShahriarRazz143)
 
     markup.add(btn1)
     markup.add(btn2, btn3)
 
-    text = """✨ *Welcome to BLACK KNOWLEDGE VIDEO DOWNLOADER* ✨
+    text = """✨ Welcome to CREATIVE VIDEO DOWNLOADER ✨
 
 🚀 Download Instagram Reels & Facebook Videos instantly!
 
 📌 Send a video link and I’ll handle everything.
 
-💎 Powered by: @BLACK_KNOWLEDGE_190"""
+💎 Powered by: @CreativeDownloader_Bot"""
 
     bot.send_message(message.chat.id, text, parse_mode="Markdown", reply_markup=markup)
 
@@ -62,9 +71,15 @@ def download_video(message):
     url = message.text.strip()
 
     if "http" not in url:
-        bot.reply_to(
-            message,
-            "❌ Please send a valid Facebook or Instagram video link."
+        bot.reply_to(message, "❌ Please send a valid Facebook or Instagram video link.")
+        return
+
+    # 🚫 FORCE JOIN CHECK
+    if not is_joined(message.from_user.id):
+        bot.send_message(
+            message.chat.id,
+            "🚫 You must join our channel first to use this bot:\n\n"
+            "👉 https://t.me/CreativeSpark1"
         )
         return
 
@@ -100,10 +115,9 @@ def download_video(message):
             bot.send_video(
                 message.chat.id,
                 video,
-                caption="Downloaded Successfully! Power by: @BLACK_KNOWLEDGE_190"
+                caption="Downloaded Successfully! Power by: @CreativeSpark1"
             )
 
-        # CLEANUP
         os.remove(filename)
 
     except Exception as e:
