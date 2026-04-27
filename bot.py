@@ -49,7 +49,7 @@ def start(message):
     markup = InlineKeyboardMarkup()
 
     btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
-    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
+    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url="https://youtube.com/@creativesparksociety?si=sOBu86XaQ4ZpP9IK")
     btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/ShahriarRazz143")
 
     markup.add(btn1)
