@@ -20,8 +20,17 @@ def is_joined(user_id):
     except:
         return False
 
+# ============ SECURED LINKS ============
+YOUTUBE_LINK = base64.b64decode(
+    "aHR0cHM6Ly95b3V0dWJlLmNvbS9AYmxhY2trbm93bGVkZ2VfMTkwP3NpPTlFd2tNUEdiLWxIUnpaZHE="
+).decode()
+
+SUPPORT_LINK = base64.b64decode(
+    "aHR0cHM6Ly90Lm1lL0JMQUNLX0tub3dsZWRnZV8xOTA="
+).decode()
+
 # ============ FLASK KEEP ALIVE ============
-app = Flask(__name__)
+app = Flask(name)
 
 @app.route('/')
 def home():
@@ -38,21 +47,23 @@ def keep_alive():
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = InlineKeyboardMarkup()
+
     btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
-    btn2 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/ShahriarRazz143")
+    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url="https://youtube.com/@creativesparksociety?si=sOBu86XaQ4ZpP9IK")
+    btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/ShahriarRazz143")
+
     markup.add(btn1)
-    markup.add(btn2)
+    markup.add(btn2, btn3)
 
-    text = """✨ **CREATIVE VIDEO DOWNLOADER** ✨
+    text = """✨ Welcome to CREATIVE VIDEO DOWNLOADER ✨
 
-🚀 I can download videos from:
-🔹 YouTube & YT Shorts
-🔹 Instagram Reels
-🔹 Facebook Videos
+🚀 Download Instagram Reels & Facebook Videos instantly!
 
-📌 **Just send me the link!**"""
+📌 Send a video link and I’ll handle everything.
 
-    bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
+💎 Powered by: @CreativeDownloader_Bot"""
+
+    bot.send_message(message.chat.id, text, reply_markup=markup)
 
 # ============ VIDEO HANDLER ============
 @bot.message_handler(func=lambda message: True)
@@ -60,56 +71,51 @@ def download_video(message):
     url = message.text.strip()
 
     if "http" not in url:
-        bot.reply_to(message, "❌ Please send a valid video link.")
+        bot.reply_to(message, "❌ Please send a valid Facebook or Instagram video link.")
         return
 
+    # 🚫 FORCE JOIN CHECK
     if not is_joined(message.from_user.id):
         bot.send_message(
             message.chat.id,
-            f"🚫 You must join our channel first to use this bot:\n\n👉 {CHANNEL_USERNAME}"
+            "🚫 You must join our channel first to use this bot:\n\n"
+            "👉 https://t.me/CreativeSpark1"
         )
         return
 
-    status_msg = bot.reply_to(message, "🔍 Analyzing link...")
-
     try:
-        # Optimized options for YT and others
+        status_msg = bot.reply_to(message, "🔍 Analyzing...")
+
         ydl_opts = {
-            'format': 'best[ext=mp4]/best', # Prioritize MP4 for Telegram compatibility
-            'outtmpl': 'downloads/%(id)s.%(ext)s',
+            'format': 'best',
+            'outtmpl': '%(id)s.%(ext)s',
             'noplaylist': True,
-            'quiet': True,
-            'max_filesize': 50000000, # 50MB Limit
+            'quiet': True
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            bot.edit_message_text("⬇️ Downloading...", message.chat.id, status_msg.message_id)
-            info = ydl.extract_info(url, download=True)
+            info = ydl.extract_info(url, download=False)
             filename = ydl.prepare_filename(info)
 
-        bot.edit_message_text("📤 Uploading to Telegram...", message.chat.id, status_msg.message_id)
+            bot.edit_message_text("⬇️ Downloading... (50%)", message.chat.id, status_msg.message_id)
+
+            ydl.download([url])
+
+        bot.edit_message_text("📤 Uploading... (100%)", message.chat.id, status_msg.message_id)
 
         with open(filename, 'rb') as video:
             bot.send_video(
                 message.chat.id,
                 video,
-                caption=f"✅ **{info.get('title', 'Video')}**\n\nPowered by: {CHANNEL_USERNAME}",
-                parse_mode="Markdown"
+                caption="Downloaded Successfully! Power by: @CreativeSpark1"
             )
 
         os.remove(filename)
-        bot.delete_message(message.chat.id, status_msg.message_id)
 
     except Exception as e:
-        error_text = str(e)
-        if "File is too large" in error_text or "max_filesize" in error_text:
-            bot.edit_message_text("⚠️ Video is too large! Telegram bots are limited to 50MB.", message.chat.id, status_msg.message_id)
-        else:
-            bot.edit_message_text(f"❌ Error: {error_text[:100]}", message.chat.id, status_msg.message_id)
+        bot.send_message(message.chat.id, f"❌ Error: {str(e)}")
 
 # ============ MAIN ============
-if __name__ == "__main__":
-    if not os.path.exists('downloads'):
-        os.makedirs('downloads')
+if name == "main":
     keep_alive()
     bot.infinity_polling()
