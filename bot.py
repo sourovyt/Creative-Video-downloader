@@ -7,7 +7,8 @@ import threading
 from flask import Flask
 
 # ============ CONFIG ============
-BOT_TOKEN = "8574407105:AAHzlKA86eiJeKFtJKCuwE-1wIzlAycVoXY"
+# WARNING: Keep your token secret! Use environment variables in production.
+BOT_TOKEN = "YOUR_NEW_BOT_TOKEN_HERE" 
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # ============ FORCE JOIN ============
@@ -15,22 +16,18 @@ CHANNEL_USERNAME = "@CreativeSpark1"
 
 def is_joined(user_id):
     try:
+        # Note: Bot must be an admin in the channel for this to work
         member = bot.get_chat_member(CHANNEL_USERNAME, user_id)
         return member.status in ["member", "administrator", "creator"]
-    except:
+    except Exception:
         return False
 
 # ============ SECURED LINKS ============
-YOUTUBE_LINK = base64.b64decode(
-    "aHR0cHM6Ly95b3V0dWJlLmNvbS9AYmxhY2trbm93bGVkZ2VfMTkwP3NpPTlFd2tNUEdiLWxIUnpaZHE="
-).decode()
-
-SUPPORT_LINK = base64.b64decode(
-    "aHR0cHM6Ly90Lm1lL0JMQUNLX0tub3dsZWRnZV8xOTA="
-).decode()
+YOUTUBE_LINK = base64.b64decode("aHR0cHM6Ly95b3V0dWJlLmNvbS9AYmxhY2trbm93bGVkZ2VfMTkwP3NpPTlFd2tNUEdiLWxIUnpaZHE=").decode()
+SUPPORT_LINK = base64.b64decode("aHR0cHM6Ly90Lm1lL0JMQUNLX0tub3dsZWRnZV8xOTA=").decode()
 
 # ============ FLASK KEEP ALIVE ============
-app = Flask(name)
+app = Flask(__name__) # Fixed: Use __name__
 
 @app.route('/')
 def home():
@@ -47,22 +44,13 @@ def keep_alive():
 @bot.message_handler(commands=['start'])
 def start(message):
     markup = InlineKeyboardMarkup()
-
     btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
-    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url="https://youtube.com/@creativesparksociety?si=sOBu86XaQ4ZpP9IK")
+    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
     btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/ShahriarRazz143")
-
     markup.add(btn1)
     markup.add(btn2, btn3)
 
-    text = """✨ Welcome to CREATIVE VIDEO DOWNLOADER ✨
-
-🚀 Download Instagram Reels & Facebook Videos instantly!
-
-📌 Send a video link and I’ll handle everything.
-
-💎 Powered by: @CreativeDownloader_Bot"""
-
+    text = "✨ Welcome to CREATIVE VIDEO DOWNLOADER ✨\n\n🚀 Download Instagram Reels & Facebook Videos instantly!"
     bot.send_message(message.chat.id, text, reply_markup=markup)
 
 # ============ VIDEO HANDLER ============
@@ -74,48 +62,37 @@ def download_video(message):
         bot.reply_to(message, "❌ Please send a valid Facebook or Instagram video link.")
         return
 
-    # 🚫 FORCE JOIN CHECK
     if not is_joined(message.from_user.id):
-        bot.send_message(
-            message.chat.id,
-            "🚫 You must join our channel first to use this bot:\n\n"
-            "👉 https://t.me/CreativeSpark1"
-        )
+        bot.send_message(message.chat.id, f"🚫 You must join {CHANNEL_USERNAME} to use this bot.")
         return
 
+    status_msg = bot.reply_to(message, "🔍 Analyzing...")
+    
     try:
-        status_msg = bot.reply_to(message, "🔍 Analyzing...")
-
         ydl_opts = {
             'format': 'best',
             'outtmpl': '%(id)s.%(ext)s',
             'noplaylist': True,
-            'quiet': True
+            'quiet': True,
+            'restrictfilenames': True, # Good for cloud hosting
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
+            info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
 
-            bot.edit_message_text("⬇️ Downloading... (50%)", message.chat.id, status_msg.message_id)
-
-            ydl.download([url])
-
-        bot.edit_message_text("📤 Uploading... (100%)", message.chat.id, status_msg.message_id)
-
-        with open(filename, 'rb') as video:
-            bot.send_video(
-                message.chat.id,
-                video,
-                caption="Downloaded Successfully! Power by: @CreativeSpark1"
-            )
-
-        os.remove(filename)
+            bot.edit_message_text("📤 Uploading...", message.chat.id, status_msg.message_id)
+            
+            with open(filename, 'rb') as video:
+                bot.send_video(message.chat.id, video, caption="✅ Downloaded successfully!")
+            
+            os.remove(filename)
+            bot.delete_message(message.chat.id, status_msg.message_id)
 
     except Exception as e:
-        bot.send_message(message.chat.id, f"❌ Error: {str(e)}")
+        bot.edit_message_text(f"❌ Error: {str(e)}", message.chat.id, status_msg.message_id)
 
 # ============ MAIN ============
-if name == "main":
+if __name__ == "__main__": # Fixed: Proper entry point
     keep_alive()
     bot.infinity_polling()
