@@ -8,7 +8,7 @@ from flask import Flask
 
 # ============ CONFIG ============
 # WARNING: Keep your token secret! Use environment variables in production.
-BOT_TOKEN = "YOUR_NEW_BOT_TOKEN_HERE" 
+BOT_TOKEN = "8574407105:AAHzlKA86eiJeKFtJKCuwE-1wIzlAycVoXY" 
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # ============ FORCE JOIN ============
@@ -45,7 +45,7 @@ def keep_alive():
 def start(message):
     markup = InlineKeyboardMarkup()
     btn1 = InlineKeyboardButton("📢 SUBSCRIBE CHANNEL", url="https://t.me/CreativeSpark1")
-    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url=YOUTUBE_LINK)
+    btn2 = InlineKeyboardButton("🎓 ALL TUTORIALS", url="https://youtube.com/@creativesparksociety?si=tc1VplH1RKb0w-uT")
     btn3 = InlineKeyboardButton("📩 CONTACT OWNER", url="https://t.me/ShahriarRazz143")
     markup.add(btn1)
     markup.add(btn2, btn3)
